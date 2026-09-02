@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeriNews — Public Fact-Check &amp; News Verifier</title>
+  
+  <!-- Fonts: Playfair Display (Headlines) & Inter (UI/Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+    .grade-A { background-color: #ecfdf5; color: #065f46; border-color: #34d399; }
+    .grade-B { background-color: #eff6ff; color: #1e40af; border-color: #60a5fa; }
+    .grade-C { background-color: #fefce8; color: #854d0e; border-color: #facc15; }
+    .grade-D { background-color: #fff1f2; color: #9f1239; border-color: #fb7185; }
+
+    .glow-A { box-shadow: 0 0 20px rgba(52, 211, 153, 0.4); }
+    .glow-B { box-shadow: 0 0 20px rgba(96, 165, 250, 0.4); }
+    .glow-C { box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
+    .glow-D { box-shadow: 0 0 20px rgba(251, 113, 133, 0.4); }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+  <!-- TOP PUBLIC BANNER -->
+  <div class="bg-slate-900 text-slate-300 text-xs py-2 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <span class="font-medium text-slate-400 hidden sm:inline-flex items-center">
+          <i class="fa-regular fa-calendar-days mr-1.5 text-rose-500"></i>
+          <span id="current-date-str">Thursday, Sep 3, 2026</span>
+        </span>
+        <div class="flex items-center space-x-2">
+          <span class="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase px-2 py-0.5 rounded">
+            Free Public Tool
+          </span>
+          <span class="text-slate-300 text-xs">
+            Verify any news article or claim instantly &bull; 100% Free &amp; Open to the Public
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 text-xs text-slate-400 font-medium">
+        <span class="flex items-center text-emerald-400">
+          <i class="fa-solid fa-circle-check mr-1"></i> Transparent Fact-Checking
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITORIAL MASTHEAD (BloguLikes Magazine Style) -->
+  <header class="bg-white border-b border-slate-200 py-6 sm:py-7 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start space-x-3">
+          <div class="w-11 h-11 bg-gradient-to-tr from-rose-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-md">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h1 class="font-serif text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              VERI<span class="text-rose-600">NEWS</span>
+            </h1>
+          </div>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 font-serif italic mt-1 tracking-wide">
+          Public News Truth Checker &bull; Instant Claim Verification &amp; Authentic Stories
+        </p>
+      </div>
+
+      <!-- Trust Index Badge -->
+      <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-2xl">
+        <div class="text-right">
+          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Public Truth Meter</div>
+          <div class="text-lg font-black text-slate-900" id="header-trust-score">88% Authentic</div>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shadow-sm">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full space-y-12">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl shadow-2xl text-white text-xs flex items-start space-x-3 transition-all duration-300">
+      <i id="toast-icon" class="fa-solid fa-circle-check mt-0.5 text-base"></i>
+      <div class="flex-grow font-medium leading-relaxed" id="toast-msg">Notification message</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- HERO SECTION: THE PUBLIC INSTANT TRUTH VERIFIER BOX          -->
+    <!-- ============================================================= -->
+    <section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-slate-800">
+      <!-- Glow effect -->
+      <div class="absolute -right-16 -top-16 w-72 h-72 bg-rose-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-72 h-72 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative max-w-3xl mx-auto text-center space-y-3">
+        <span class="bg-rose-600/90 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full inline-block shadow">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Instant News Verifier
+        </span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          Is this news True or False?
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          Paste any web link or news headline below. Our automated fact-checking engine extracts the claims and checks them against verified sources and known red flags.
+        </p>
+
+        <!-- Input Mode Switcher Tabs -->
+        <div class="flex justify-center pt-2">
+          <div class="inline-flex bg-slate-800/80 p-1 rounded-2xl border border-slate-700">
+            <button id="tab-url-btn" onclick="switchInputMode('url')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow transition">
+              <i class="fa-solid fa-link mr-1.5"></i> Check Web Link (URL)
+            </button>
+            <button id="tab-text-btn" onclick="switchInputMode('text')" class="px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition">
+              <i class="fa-solid fa-font mr-1.5"></i> Check Headline or Text
+            </button>
+          </div>
+        </div>
+
+        <!-- Verification Form -->
+        <form onsubmit="handleInstantVerification(event)" class="pt-3 space-y-4">
+          <!-- URL Input Box -->
+          <div id="box-url-input">
+            <div class="relative flex items-center">
+              <i class="fa-solid fa-globe absolute left-4 text-slate-400 text-sm"></i>
+              <input id="verifier-url" type="url" placeholder="Paste full article link (e.g. https://bbc.com/... or https://example.com/news...)" 
+                     class="w-full pl-11 pr-32 py-3.5 text-xs sm:text-sm bg-white text-slate-900 rounded-2xl border-2 border-slate-200 focus:border-rose-500 focus:outline-none shadow-lg transition">
+              <button type="submit" id="btn-verify-main" class="absolute right-2 bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Check Truth</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Text Input Box (Alternative) -->
+          <div id="box-text-input" class="hidden space-y-3 text-left">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Headline or News Claim</label>
+              <input id="verifier-title" type="text" placeholder="e.g. NASA discovers water on exoplanet, or Miracle tea cures all diseases..." 
+                     class="w-full px-4 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl focus:border-rose-500 focus:outline-none shadow">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">News Content / Details (Optional)</label>
+              <textarea id="verifier-content" rows="3" placeholder="Paste paragraphs, quotes, or statements here..." 
+                        class="w-full px-4 py-2 text-xs sm:text-sm bg-white text-slate-900 rounded-xl focus:border-rose-500 focus:outline-none shadow"></textarea>
+            </div>
+            <button type="submit" id="btn-verify-text" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-sm shadow-md transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Analyze &amp; Check Truth</span>
+            </button>
+          </div>
+        </form>
+
+        <p class="text-[11px] text-slate-400 pt-1">
+          <i class="fa-solid fa-lock mr-1 text-slate-500"></i> No login or account required &bull; Free instant results
+        </p>
+      </div>
+
+      <!-- ============================================================= -->
+      <!-- DYNAMIC LIVE VERIFICATION RESULT CARD (Appears upon checking) -->
+      <!-- ============================================================= -->
+      <div id="instant-result-box" class="hidden mt-8 max-w-3xl mx-auto bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in duration-300">
+        
+        <!-- Header Banner: Verdict & Grade -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Fact-Check Verdict</span>
+            <div class="flex items-center space-x-3">
+              <span id="res-verdict-badge" class="px-3.5 py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider">
+                Likely True
+              </span>
+              <span id="res-grade-badge" class="px-3 py-1 rounded-2xl text-xs sm:text-sm font-black border">
+                Grade A &bull; 95%
+              </span>
+            </div>
+          </div>
+
+          <div class="text-left sm:text-right">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Trust Score</span>
+            <span id="res-score-num" class="text-3xl font-serif font-black text-slate-900">95/100</span>
+          </div>
+        </div>
+
+        <!-- Headline & Plain English Explanation -->
+        <div class="py-5 space-y-4">
+          <div>
+            <span class="text-xs text-slate-400 font-semibold" id="res-publisher-meta">Checked Article</span>
+            <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 leading-snug" id="res-title">
+              Article Title
+            </h3>
+          </div>
+
+          <!-- Plain-English Verdict Box -->
+          <div class="p-4 rounded-2xl text-xs sm:text-sm leading-relaxed" id="res-explanation-box">
+            Loading summary...
+          </div>
+        </div>
+
+        <!-- Claim Checks Breakdown -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Claim-by-Claim Breakdown:</h4>
+          <div class="space-y-2" id="res-claims-list">
+            <!-- Claims dynamically loaded -->
+          </div>
+        </div>
+
+        <!-- Action / Reset -->
+        <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+          <button onclick="viewFullAuditBreakdown()" class="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center">
+            <i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i> Inspect 4-Pillar Score Details &rarr;
+          </button>
+          <button onclick="resetInstantBox()" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Check Another Story
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- EDITORIAL NEWS FEED (BloguLikes Magazine Style)               -->
+    <!-- ============================================================= -->
+    <div class="space-y-10">
+
+      <!-- Navigation & Category Filter Pills -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <nav class="flex items-center space-x-2 overflow-x-auto py-1 text-xs font-medium">
+          <button onclick="filterCategory('All')" class="cat-pill active px-4 py-1.5 rounded-full font-bold bg-slate-900 text-white shadow-sm transition">
+            All Stories
+          </button>
+          <button onclick="filterCategory('Climate')" class="cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition">
+            Climate &amp; Energy
+          </button>
+          <button onclick="filterCategory('Technology')" class="cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition">
+            Technology &amp; AI
+          </button>
+          <button onclick="filterCategory('World')" class="cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition">
+            World Affairs
+          </button>
+          <button onclick="filterCategory('Economy')" class="cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition">
+            Economy
+          </button>
+          <button onclick="filterCategory('Health')" class="cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition">
+            Health &amp; Medicine
+          </button>
+        </nav>
+
+        <!-- Search input -->
+        <div class="relative w-full sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+          <input id="search-input" oninput="handleSearchInput(event)" type="text" placeholder="Search verified stories..." 
+                 class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-full focus:outline-none focus:border-slate-400 transition">
+        </div>
+      </div>
+
+      <!-- Hero Featured Showcase (Top 3 Stories) -->
+      <section id="hero-showcase" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Main Lead Story (Left 8 Cols) -->
+        <div id="hero-lead-container" class="lg:col-span-8 group relative rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900 min-h-[380px] flex flex-col justify-end">
+          <div class="p-8 text-center text-slate-400 my-auto">
+            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+            <p>Loading featured story...</p>
+          </div>
+        </div>
+
+        <!-- Two Secondary Stacked Stories (Right 4 Cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-6" id="hero-secondary-container">
+          <div class="p-8 text-center text-slate-400 my-auto">
+            <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
+            <p class="text-xs">Loading spotlight...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2-Column Grid: Latest Stories + Public Sidebar -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+        
+        <!-- Left: Verified Articles Feed (8 Cols) -->
+        <section class="lg:col-span-8 space-y-6">
+          <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 bg-rose-600 rounded-sm"></span>
+              <h3 class="font-serif text-2xl font-bold text-slate-900 tracking-tight">
+                Verified News Feed
+              </h3>
+            </div>
+            <span class="text-xs font-semibold text-slate-500" id="article-count-label">Loading...</span>
+          </div>
+
+          <!-- Cards Grid -->
+          <div id="articles-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="col-span-full text-center py-16 text-slate-400">
+              <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+              <p>Loading news stories...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Public Fact-Check Sidebar (4 Cols) -->
+        <aside class="lg:col-span-4 space-y-6">
+
+          <!-- Widget: Public Truth Radar -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h4 class="font-serif font-bold text-slate-900 text-base flex items-center">
+                <i class="fa-solid fa-shield-check mr-2 text-rose-600"></i> Truth Index
+              </h4>
+              <span class="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Live Monitor</span>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                  <span>Authentic Verified News</span>
+                  <span id="stat-verified-pct">80%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                  <span>Flagged / False Stories</span>
+                  <span>1 Disputed</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-500 h-full rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Widget: Disputed / Debunked Alert -->
+          <div class="bg-gradient-to-br from-rose-50 to-pink-50/40 p-6 rounded-3xl border border-rose-200/80 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-rose-700 font-serif font-bold text-base">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+              <h4>Recent Disputed Alert</h4>
+            </div>
+            <div id="disputed-sidebar-container" class="space-y-3">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+
+          <!-- Widget: How Truth Scoring Works -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+            <h4 class="font-serif font-bold text-slate-900 text-base flex items-center">
+              <i class="fa-solid fa-scale-balanced mr-2 text-indigo-600"></i> How We Check News
+            </h4>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Every story verified on VeriNews is evaluated transparently across 4 pillars:
+            </p>
+            <ul class="text-xs space-y-2 text-slate-700">
+              <li class="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
+                <span><strong>Source Reliability</strong></span>
+                <span class="text-slate-400 font-bold">30%</span>
+              </li>
+              <li class="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
+                <span><strong>Claim Accuracy</strong></span>
+                <span class="text-slate-400 font-bold">40%</span>
+              </li>
+              <li class="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
+                <span><strong>Corroboration &amp; Quotes</strong></span>
+                <span class="text-slate-400 font-bold">15%</span>
+              </li>
+              <li class="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
+                <span><strong>Recency / Freshness</strong></span>
+                <span class="text-slate-400 font-bold">15%</span>
+              </li>
+            </ul>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: DETAILED AUDIT DRAWER (Click-to-inspect) -->
+  <div id="breakdown-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
+      
+      <div class="px-8 py-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/80">
+        <div class="flex items-center space-x-3">
+          <span id="modal-grade-pill" class="text-xl font-black px-3.5 py-1 rounded-2xl border">A</span>
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Fact-Check Audit Report</span>
+            <h3 class="font-serif font-bold text-slate-900 text-lg leading-snug" id="modal-article-title">Article Title</h3>
+          </div>
+        </div>
+        <button onclick="closeModal('breakdown-modal')" class="text-slate-400 hover:text-slate-700 text-2xl font-bold w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-200 transition">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-8 overflow-y-auto space-y-6">
+        <div class="p-5 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-indigo-950 text-xs sm:text-sm leading-relaxed" id="modal-narrative">
+          Loading explanation...
+        </div>
+
+        <!-- 4 Pillars -->
+        <div>
+          <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">4-Pillar Score Breakdown</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="modal-pillars">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Claim Findings -->
+        <div>
+          <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Extracted Statements &amp; Verdicts</h4>
+          <div class="space-y-2.5" id="modal-claims-list">
+            <p class="text-xs text-slate-400">No claim records available.</p>
+          </div>
+        </div>
+
+        <!-- Positives & Risks -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-100">
+            <h5 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center">
+              <i class="fa-solid fa-circle-check mr-1.5 text-emerald-600"></i> Credibility Signals
+            </h5>
+            <ul id="modal-positives" class="text-xs text-emerald-950 space-y-1.5 list-disc list-inside">
+              <li>Standard verified reporting</li>
+            </ul>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-rose-50/60 border border-rose-100">
+            <h5 class="text-xs font-bold text-rose-800 uppercase tracking-wider mb-2 flex items-center">
+              <i class="fa-solid fa-triangle-exclamation mr-1.5 text-rose-600"></i> Risk Flags
+            </h5>
+            <ul id="modal-risks" class="text-xs text-rose-950 space-y-1.5 list-disc list-inside">
+              <li>None recorded</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-8 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+        <button onclick="closeModal('breakdown-modal')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">
+          Close Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-10 mt-auto text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2 text-white">
+          <i class="fa-solid fa-shield-halved text-rose-500 text-lg"></i>
+          <span class="font-serif text-xl font-bold">VERINEWS</span>
+        </div>
+        <p class="text-slate-400 text-[11px] leading-relaxed">
+          A free public news authentication and fact-checking tool designed to combat misinformation through explainable, transparent claim verification.
+        </p>
+      </div>
+
+      <div>
+        <h5 class="font-bold text-white uppercase text-xs tracking-wider mb-2.5">Topic Categories</h5>
+        <div class="flex flex-wrap gap-2 text-[11px]">
+          <span class="bg-slate-800 px-2.5 py-1 rounded-full">Climate &amp; Energy</span>
+          <span class="bg-slate-800 px-2.5 py-1 rounded-full">Technology &amp; AI</span>
+          <span class="bg-slate-800 px-2.5 py-1 rounded-full">World Affairs</span>
+          <span class="bg-slate-800 px-2.5 py-1 rounded-full">Health &amp; Medicine</span>
+          <span class="bg-slate-800 px-2.5 py-1 rounded-full">Economy</span>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <h5 class="font-bold text-white uppercase text-xs tracking-wider mb-2.5">About This Platform</h5>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Open-source architecture powered by FastAPI, SQLAlchemy, and Rule-Based Fact Checking. Developed for public accessibility.
+        </p>
+        <p class="text-[10px] text-slate-500 pt-2">&copy; 2026 VeriNews. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    let allArticles = [];
+    let currentCategory = "All";
+    let currentSearchTerm = "";
+    let lastVerifiedArticleId = null;
+
+    document.getElementById("current-date-str").innerText = new Date().toLocaleDateString(undefined, {
+      weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
+    });
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toast-msg");
+      const toastIcon = document.getElementById("toast-icon");
+      toastMsg.innerText = msg;
+      if (isError) {
+        toast.className = "fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl shadow-2xl text-white text-xs flex items-start space-x-3 bg-rose-600 transition-all";
+        toastIcon.className = "fa-solid fa-circle-exclamation mt-0.5 text-base";
+      } else {
+        toast.className = "fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl shadow-2xl text-white text-xs flex items-start space-x-3 bg-slate-900 transition-all";
+        toastIcon.className = "fa-solid fa-circle-check mt-0.5 text-base text-emerald-400";
+      }
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 4000);
+    }
+
+    function switchInputMode(mode) {
+      const urlBox = document.getElementById("box-url-input");
+      const textBox = document.getElementById("box-text-input");
+      const urlBtn = document.getElementById("tab-url-btn");
+      const textBtn = document.getElementById("tab-text-btn");
+
+      if (mode === 'url') {
+        urlBox.classList.remove("hidden");
+        textBox.classList.add("hidden");
+        urlBtn.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow transition";
+        textBtn.className = "px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition";
+      } else {
+        urlBox.classList.add("hidden");
+        textBox.classList.remove("hidden");
+        textBtn.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow transition";
+        urlBtn.className = "px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition";
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+    // ============================================================
+    // PUBLIC INSTANT VERIFICATION HANDLER
+    // ============================================================
+    async function handleInstantVerification(e) {
+      e.preventDefault();
+      const urlInput = document.getElementById("verifier-url").value.trim();
+      const titleInput = document.getElementById("verifier-title").value.trim();
+      const contentInput = document.getElementById("verifier-content").value.trim();
+
+      const isUrlMode = !document.getElementById("box-url-input").classList.contains("hidden");
+      if (isUrlMode && !urlInput) {
+        return showToast("Please paste a valid news article URL.", true);
+      }
+      if (!isUrlMode && !titleInput && !contentInput) {
+        return showToast("Please enter a news headline or statement to check.", true);
+      }
+
+      const mainBtn = isUrlMode ? document.getElementById("btn-verify-main") : document.getElementById("btn-verify-text");
+      const origHtml = mainBtn.innerHTML;
+      mainBtn.disabled = true;
+      mainBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Checking Truth...`;
+
+      try {
+        const payload = isUrlMode ? { url: urlInput } : { title: titleInput, content: contentInput || titleInput };
+        const res = await fetch("/api/v1/public/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Fact-checking failed");
+
+        lastVerifiedArticleId = data.article_id;
+        displayInstantResult(data);
+        showToast("News analysis complete!");
+        loadArticles(); // Refresh feed to include the newly checked story
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        mainBtn.disabled = false;
+        mainBtn.innerHTML = origHtml;
+      }
+    }
+
+    function displayInstantResult(data) {
+      const box = document.getElementById("instant-result-box");
+      document.getElementById("res-title").innerText = data.title;
+      document.getElementById("res-publisher-meta").innerText = `${data.publisher || 'Direct Submission'} &bull; ${data.category || 'General'}`;
+      document.getElementById("res-score-num").innerText = `${data.overall_score}/100`;
+
+      // Verdict styling
+      const verdictBadge = document.getElementById("res-verdict-badge");
+      const gradeBadge = document.getElementById("res-grade-badge");
+      const explBox = document.getElementById("res-explanation-box");
+
+      const isTrue = data.overall_score >= 70;
+      const isQuestionable = data.overall_score >= 50 && data.overall_score < 70;
+
+      if (isTrue) {
+        verdictBadge.innerText = "Verified True / Authentic";
+        verdictBadge.className = "px-3.5 py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300";
+        gradeBadge.className = "px-3 py-1 rounded-2xl text-xs sm:text-sm font-black border grade-A";
+        gradeBadge.innerText = `Grade ${data.grade} &bull; High Trust`;
+        explBox.className = "p-4 rounded-2xl text-xs sm:text-sm leading-relaxed bg-emerald-50 text-emerald-950 border border-emerald-200";
+      } else if (isQuestionable) {
+        verdictBadge.innerText = "Questionable / Needs Source Check";
+        verdictBadge.className = "px-3.5 py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300";
+        gradeBadge.className = "px-3 py-1 rounded-2xl text-xs sm:text-sm font-black border grade-C";
+        gradeBadge.innerText = `Grade ${data.grade} &bull; Mixed Trust`;
+        explBox.className = "p-4 rounded-2xl text-xs sm:text-sm leading-relaxed bg-amber-50 text-amber-950 border border-amber-200";
+      } else {
+        verdictBadge.innerText = "Disputed / Likely Fake News";
+        verdictBadge.className = "px-3.5 py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300";
+        gradeBadge.className = "px-3 py-1 rounded-2xl text-xs sm:text-sm font-black border grade-D";
+        gradeBadge.innerText = `Grade ${data.grade} &bull; Unreliable`;
+        explBox.className = "p-4 rounded-2xl text-xs sm:text-sm leading-relaxed bg-rose-50 text-rose-950 border border-rose-200";
+      }
+
+      explBox.innerHTML = `
+        <strong>Why this verdict was given:</strong> ${data.explanation.summary || data.explanation.grade_description}
+      `;
+
+      // Claims list
+      const claimsContainer = document.getElementById("res-claims-list");
+      if (data.claims && data.claims.length > 0) {
+        claimsContainer.innerHTML = data.claims.map(c => {
+          const v = (c.verdict || "").toLowerCase();
+          let icon = "fa-circle-check text-emerald-600";
+          let badgeClass = "bg-emerald-100 text-emerald-800 border-emerald-300";
+          let label = "TRUE";
+
+          if (v === 'false') {
+            icon = "fa-circle-xmark text-rose-600";
+            badgeClass = "bg-rose-100 text-rose-800 border-rose-300";
+            label = "FALSE";
+          } else if (v === 'misleading') {
+            icon = "fa-triangle-exclamation text-amber-600";
+            badgeClass = "bg-amber-100 text-amber-800 border-amber-300";
+            label = "MISLEADING";
+          }
+
+          return `
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-start space-x-3 text-xs">
+              <i class="fa-solid ${icon} mt-0.5 text-base"></i>
+              <div class="flex-grow space-y-1">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="font-semibold text-slate-900 leading-snug">"${c.claim_text}"</p>
+                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${badgeClass} whitespace-nowrap">${label}</span>
+                </div>
+                ${c.explanation ? `<p class="text-[11px] text-slate-500">${c.explanation}</p>` : ''}
+              </div>
+            </div>
+          `;
+        }).join("");
+      } else {
+        claimsContainer.innerHTML = `<p class="text-xs text-slate-400">Standard claim extraction completed.</p>`;
+      }
+
+      box.classList.remove("hidden");
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetInstantBox() {
+      document.getElementById("instant-result-box").classList.add("hidden");
+      document.getElementById("verifier-url").value = "";
+      document.getElementById("verifier-title").value = "";
+      document.getElementById("verifier-content").value = "";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function viewFullAuditBreakdown() {
+      if (lastVerifiedArticleId) {
+        viewBreakdown(lastVerifiedArticleId);
+      }
+    }
+
+    // ============================================================
+    // EDITORIAL FEED & CATEGORIES
+    // ============================================================
+    async function loadArticles() {
+      try {
+        const res = await fetch("/api/v1/articles?limit=50");
+        const data = await res.json();
+        allArticles = data.articles || [];
+        renderFilteredFeed();
+        loadSidebarWidgets();
+      } catch (err) {
+        document.getElementById("articles-grid").innerHTML = `
+          <div class="col-span-full text-center py-10 text-rose-500 text-sm">
+            Could not connect to API server: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(p => {
+        if (p.innerText.includes(cat) || (cat === "All" && p.innerText.includes("All Stories"))) {
+          p.className = "cat-pill active px-4 py-1.5 rounded-full font-bold bg-slate-900 text-white shadow-sm transition";
+        } else {
+          p.className = "cat-pill px-4 py-1.5 rounded-full font-semibold text-slate-600 hover:bg-slate-100 transition";
+        }
+      });
+      renderFilteredFeed();
+    }
+
+    function handleSearchInput(e) {
+      currentSearchTerm = e.target.value.toLowerCase().trim();
+      renderFilteredFeed();
+    }
+
+    function renderFilteredFeed() {
+      let filtered = allArticles;
+
+      if (currentCategory !== "All") {
+        filtered = filtered.filter(a => (a.category || "").toLowerCase() === currentCategory.toLowerCase());
+      }
+
+      if (currentSearchTerm) {
+        filtered = filtered.filter(a => 
+          (a.title || "").toLowerCase().includes(currentSearchTerm) ||
+          (a.content || "").toLowerCase().includes(currentSearchTerm) ||
+          (a.publisher || "").toLowerCase().includes(currentSearchTerm)
+        );
+      }
+
+      document.getElementById("article-count-label").innerText = `Showing ${filtered.length} verified stor${filtered.length === 1 ? 'y' : 'ies'}`;
+
+      // Render Hero Showcase
+      renderHeroShowcase(allArticles);
+
+      // Render Main Grid
+      const grid = document.getElementById("articles-grid");
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300">
+            <i class="fa-regular fa-newspaper text-4xl text-slate-300 mb-3"></i>
+            <h3 class="font-serif font-bold text-slate-700 text-lg">No matching stories found</h3>
+            <p class="text-xs text-slate-400 mt-1">Try another category or use the verifier at the top to check a story.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(art => {
+        const score = art.latest_trust_score;
+        const grade = score ? score.grade : "N/A";
+        const scoreVal = score ? score.overall_score : 0;
+        const gradeClass = score ? `grade-${score.grade}` : "bg-slate-100 text-slate-600 border-slate-200";
+        const defaultImg = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80";
+        const imgSrc = art.image_url || defaultImg;
+        const dateStr = new Date(art.published_at || art.created_at).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+
+        return `
+          <article class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col group">
+            <div class="relative h-44 w-full overflow-hidden bg-slate-100">
+              <img src="${imgSrc}" alt="${art.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                ${art.category || 'News'}
+              </span>
+              <span class="absolute top-3 right-3 text-xs font-black px-2.5 py-0.5 rounded-full border shadow-sm ${gradeClass}">
+                Grade ${grade} &bull; ${scoreVal}
+              </span>
+            </div>
+
+            <div class="p-5 flex-grow flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center space-x-2 text-[11px] text-slate-400 mb-1 font-medium">
+                  <span class="text-rose-600 font-bold">${art.publisher || 'Verified Wire'}</span>
+                  <span>&bull;</span>
+                  <span>${dateStr}</span>
+                </div>
+
+                <h3 class="font-serif font-bold text-slate-900 text-base leading-snug group-hover:text-rose-600 transition">
+                  <a href="javascript:void(0)" onclick="viewBreakdown(${art.id})">${art.title}</a>
+                </h3>
+
+                <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                  ${art.summary || art.content.slice(0, 130) + '...'}
+                </p>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold text-slate-600">
+                  <span>Trust Index</span>
+                  <span>${scoreVal}/100</span>
+                </div>
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500 ${scoreVal >= 70 ? 'bg-emerald-500' : (scoreVal >= 50 ? 'bg-amber-500' : 'bg-rose-500')}" style="width: ${scoreVal}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-5 py-3 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center text-xs font-bold">
+              <button onclick="viewBreakdown(${art.id})" class="text-slate-800 hover:text-rose-600 flex items-center transition">
+                <i class="fa-solid fa-magnifying-glass-chart mr-1.5 text-rose-500"></i> View Fact-Check
+              </button>
+              ${art.source_url ? `<a href="${art.source_url}" target="_blank" rel="noopener" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderHeroShowcase(articles) {
+      if (!articles || articles.length === 0) return;
+
+      const lead = articles[0];
+      const leadScore = lead.latest_trust_score;
+      const leadGrade = leadScore ? leadScore.grade : "A";
+      const leadScoreVal = leadScore ? leadScore.overall_score : 90;
+      const leadImg = lead.image_url || "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1200&q=80";
+
+      document.getElementById("hero-lead-container").innerHTML = `
+        <img src="${leadImg}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700 brightness-75">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+
+        <div class="relative p-6 sm:p-8 space-y-2.5 z-10">
+          <div class="flex items-center space-x-3">
+            <span class="bg-rose-600 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow">
+              Top Story &bull; ${lead.category || 'Featured'}
+            </span>
+            <span class="text-xs font-black px-3 py-1 rounded-full border shadow ${leadScoreVal >= 70 ? 'grade-A' : 'grade-D'}">
+              Grade ${leadGrade} &bull; ${leadScoreVal} Trust
+            </span>
+          </div>
+
+          <h2 class="font-serif text-2xl sm:text-3xl font-black text-white leading-tight hover:text-rose-300 transition">
+            <a href="javascript:void(0)" onclick="viewBreakdown(${lead.id})">${lead.title}</a>
+          </h2>
+
+          <p class="text-xs sm:text-sm text-slate-300 line-clamp-2 max-w-2xl font-light">
+            ${lead.summary || lead.content.slice(0, 160)}
+          </p>
+
+          <div class="pt-2 flex items-center justify-between">
+            <div class="text-xs text-slate-400 font-medium">
+              <span class="text-white font-bold">${lead.publisher || 'Reuters'}</span> &bull; Verified Public Audit
+            </div>
+            <button onclick="viewBreakdown(${lead.id})" class="bg-white/10 hover:bg-white text-white hover:text-slate-950 text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-md transition flex items-center">
+              <i class="fa-solid fa-shield-check mr-1.5 text-rose-400"></i> Inspect Evidence
+            </button>
+          </div>
+        </div>
+      `;
+
+      const secondContainer = document.getElementById("hero-secondary-container");
+      const subStories = articles.slice(1, 3);
+      if (subStories.length > 0) {
+        secondContainer.innerHTML = subStories.map(art => {
+          const score = art.latest_trust_score;
+          const grade = score ? score.grade : "B";
+          const scoreVal = score ? score.overall_score : 80;
+          const img = art.image_url || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80";
+
+          return `
+            <div class="group relative rounded-3xl overflow-hidden shadow border border-slate-200 bg-slate-900 flex-1 min-h-[180px] flex flex-col justify-end">
+              <img src="${img}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500 brightness-75">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+              
+              <div class="relative p-4 sm:p-5 space-y-1.5 z-10">
+                <div class="flex items-center space-x-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-slate-950/80 px-2.5 py-0.5 rounded-full">
+                    ${art.category || 'Spotlight'}
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${scoreVal >= 70 ? 'grade-A' : (scoreVal >= 50 ? 'grade-B' : 'grade-D')}">
+                    Grade ${grade} &bull; ${scoreVal}
+                  </span>
+                </div>
+                <h3 class="font-serif font-bold text-white text-sm sm:text-base leading-snug hover:text-rose-300 transition">
+                  <a href="javascript:void(0)" onclick="viewBreakdown(${art.id})">${art.title}</a>
+                </h3>
+                <div class="flex justify-between items-center pt-1 text-[11px] text-slate-300">
+                  <span>${art.publisher || 'Verified News'}</span>
+                  <button onclick="viewBreakdown(${art.id})" class="text-rose-400 hover:text-rose-300 font-bold">
+                    Inspect &rarr;
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    async function loadSidebarWidgets() {
+      try {
+        const disputed = allArticles.filter(a => (a.latest_trust_score && a.latest_trust_score.overall_score < 50) || a.status === 'flagged');
+        const container = document.getElementById("disputed-sidebar-container");
+        if (disputed.length > 0) {
+          container.innerHTML = disputed.slice(0, 2).map(d => `
+            <div class="p-3 bg-white/90 rounded-2xl border border-rose-200 text-xs space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-rose-700 uppercase text-[10px]">Debunked Fake Claim</span>
+                <span class="grade-D text-[10px] font-black px-2 py-0.5 rounded border">Grade D</span>
+              </div>
+              <h4 class="font-semibold text-slate-900 leading-snug line-clamp-2">
+                ${d.title}
+              </h4>
+              <button onclick="viewBreakdown(${d.id})" class="text-[11px] font-bold text-rose-600 hover:text-rose-800 flex items-center pt-0.5">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> See Fact-Check Analysis &rarr;
+              </button>
+            </div>
+          `).join("");
+        } else {
+          container.innerHTML = `<p class="text-xs text-rose-800 italic">No disputed stories currently flagged.</p>`;
+        }
+      } catch (e) {}
+    }
+
+    // ============================================================
+    // AUDIT BREAKDOWN MODAL (Public Details)
+    // ============================================================
+    async function viewBreakdown(articleId) {
+      try {
+        const [scoreRes, reportRes, artRes] = await Promise.all([
+          fetch(`/api/v1/articles/${articleId}/trust-score`),
+          fetch(`/api/v1/articles/${articleId}/report`),
+          fetch(`/api/v1/articles/${articleId}`),
+        ]);
+        
+        if (!scoreRes.ok) throw new Error("Fact check report not yet available for this story.");
+        const scoreData = await scoreRes.json();
+        const reportData = reportRes.ok ? await reportRes.json() : null;
+        const artData = artRes.ok ? await artRes.json() : null;
+
+        const expl = scoreData.explanation;
+        document.getElementById("modal-article-title").innerText = artData ? artData.title : `Story #${articleId}`;
+        
+        const gradePill = document.getElementById("modal-grade-pill");
+        gradePill.innerText = `Grade ${scoreData.grade} &bull; ${scoreData.overall_score}/100`;
+        gradePill.className = `text-xl font-black px-3.5 py-1 rounded-2xl border grade-${scoreData.grade}`;
+
+        document.getElementById("modal-narrative").innerHTML = `
+          <strong>Audited Explanation:</strong> ${expl.summary || expl.grade_description}
+        `;
+
+        // 4 pillars
+        const pillars = document.getElementById("modal-pillars");
+        pillars.innerHTML = `
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Source (30%)</span>
+            <span class="text-2xl font-black text-slate-900 mt-1 block">${scoreData.source_reliability_score}</span>
+            <span class="text-[10px] text-slate-500 block">Domain &amp; credibility</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Claims (40%)</span>
+            <span class="text-2xl font-black text-slate-900 mt-1 block">${scoreData.claim_verification_score}</span>
+            <span class="text-[10px] text-slate-500 block">Factual accuracy</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Corrob. (15%)</span>
+            <span class="text-2xl font-black text-slate-900 mt-1 block">${scoreData.corroboration_score}</span>
+            <span class="text-[10px] text-slate-500 block">Quotes &amp; citations</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Recency (15%)</span>
+            <span class="text-2xl font-black text-slate-900 mt-1 block">${scoreData.recency_score}</span>
+            <span class="text-[10px] text-slate-500 block">Freshness</span>
+          </div>
+        `;
+
+        // Claims list
+        const claimsList = document.getElementById("modal-claims-list");
+        if (reportData && reportData.claims && reportData.claims.length > 0) {
+          claimsList.innerHTML = reportData.claims.map(c => {
+            const vBadge = {
+              'true': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+              'misleading': 'bg-amber-100 text-amber-800 border-amber-300',
+              'false': 'bg-rose-100 text-rose-800 border-rose-300',
+              'unverified': 'bg-slate-100 text-slate-700 border-slate-300',
+            }[c.verdict] || 'bg-slate-100 text-slate-700';
+
+            return `
+              <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-1.5">
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-xs font-semibold text-slate-900 leading-snug">"${c.claim_text}"</p>
+                  <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${vBadge} whitespace-nowrap">${c.verdict}</span>
+                </div>
+                ${c.explanation ? `<p class="text-[11px] text-slate-600">${c.explanation}</p>` : ''}
+                ${c.evidence_sources ? `<p class="text-[10px] text-indigo-600 font-mono"><i class="fa-solid fa-shield mr-1"></i>${c.evidence_sources}</p>` : ''}
+              </div>
+            `;
+          }).join("");
+        } else {
+          claimsList.innerHTML = `<p class="text-xs text-slate-400">Standard claim analysis completed.</p>`;
+        }
+
+        const positivesList = document.getElementById("modal-positives");
+        positivesList.innerHTML = (expl.positive_signals && expl.positive_signals.length > 0)
+          ? expl.positive_signals.map(p => `<li>${p}</li>`).join("")
+          : `<li>Standard baseline verification completed</li>`;
+
+        const risksList = document.getElementById("modal-risks");
+        risksList.innerHTML = (expl.risk_factors && expl.risk_factors.length > 0)
+          ? expl.risk_factors.map(r => `<li>${r}</li>`).join("")
+          : `<li>No red flags or contradictions detected</li>`;
+
+        document.getElementById("breakdown-modal").classList.remove("hidden");
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    // Initialize public feed
+    loadArticles();
+  </script>
+</body>
+</html>

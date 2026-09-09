@@ -3,10 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.core.config import settings
 
-# For SQLite, connect_args is needed for multithreading
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+db_url = settings.db_url
+connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
 
-engine = create_engine(settings.database_url, connect_args=connect_args)
+engine = create_engine(db_url, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

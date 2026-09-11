@@ -1,0 +1,45 @@
+# ── Required ──────────────────────────────────────────────────────────────
+# FastAPI web framework
+fastapi>=0.115,<1.0
+
+# ASGI server
+uvicorn[standard]>=0.30,<1.0
+
+# Settings management (reads .env files)
+pydantic-settings>=2.6,<3.0
+
+# JWT token generation & validation
+python-jose[cryptography]>=3.3,<4.0
+
+# Password hashing
+passlib[bcrypt]>=1.7,<2.0
+bcrypt>=4.0,<5.0
+
+# Database ORM
+sqlalchemy>=2.0,<3.0
+
+# Email validation for Pydantic
+email-validator>=2.2,<3.0
+
+# Multipart form data (required for OAuth2 login form)
+python-multipart>=0.0.18,<1.0
+
+# ── Optional: Production Database ─────────────────────────────────────────
+# Uncomment for PostgreSQL support:
+psycopg[binary]>=3.2,<4.0
+
+# ── HTTP Client (URL scraping & external API calls) ───────────────────────
+# The application uses httpx for outbound requests; Starlette's TestClient
+# uses the successor package.
+httpx>=0.28,<1.0
+httpx2>=2.0,<3.0
+beautifulsoup4>=4.12,<5.0
+lxml>=6.0,<7.0
+
+# ── RSS Feed parsing ──────────────────────────────────────────────────────
+feedparser>=6.0,<7.0
+
+# ── Testing ───────────────────────────────────────────────────────────────
+pytest>=8.2,<9.0
+pytest-asyncio>=1.0,<2.0
+anyio>=4.0,<5.0

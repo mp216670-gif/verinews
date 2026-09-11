@@ -263,12 +263,52 @@ def seed_initial_data():
         db.close()
 
 
+def provision_initial_admin():
+    """Provision the explicitly configured production administrator once."""
+    credentials = (
+        settings.initial_admin_username,
+        settings.initial_admin_email,
+        settings.initial_admin_password,
+    )
+    if not all(credentials):
+        if any(credentials):
+            raise RuntimeError(
+                "INITIAL_ADMIN_USERNAME, INITIAL_ADMIN_EMAIL, and INITIAL_ADMIN_PASSWORD must be set together."
+            )
+
+    db = SessionLocal()
+    try:
+        if not any(credentials):
+            has_admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+            if not has_admin:
+                raise RuntimeError(
+                    "Configure INITIAL_ADMIN_USERNAME, INITIAL_ADMIN_EMAIL, and INITIAL_ADMIN_PASSWORD "
+                    "before the first production deployment."
+                )
+            return
+
+        admin = db.query(User).filter(User.username == settings.initial_admin_username).first()
+        if not admin:
+            db.add(User(
+                username=settings.initial_admin_username,
+                email=settings.initial_admin_email,
+                hashed_password=hash_password(settings.initial_admin_password),
+                role=UserRole.ADMIN,
+                is_active=True,
+            ))
+            db.commit()
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database tables
     Base.metadata.create_all(bind=engine)
-    # Seed initial test fixtures and demo accounts
-    seed_initial_data()
+    if settings.should_seed_demo_data:
+        seed_initial_data()
+    elif settings.is_production:
+        provision_initial_admin()
     yield
 
 

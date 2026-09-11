@@ -26,9 +26,13 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
             detail="Username or email already registered.",
         )
 
-    # First user can be admin, otherwise default to requested or reader
+    # Production sign-up is deliberately reader-only. Administrators promote
+    # institutional users through the protected admin endpoint after bootstrap.
     user_count = db.query(User).count()
-    assigned_role = UserRole.ADMIN if user_count == 0 else (user_in.role or UserRole.READER)
+    if settings.is_production:
+        assigned_role = UserRole.READER
+    else:
+        assigned_role = UserRole.ADMIN if user_count == 0 else (user_in.role or UserRole.READER)
 
     user = User(
         username=user_in.username,
